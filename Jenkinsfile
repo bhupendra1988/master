@@ -63,3 +63,27 @@ node() {
  }
 }
 ######################################################################################
+node('master') {
+ stage('ContinuousDownload')
+ {
+     git 'https://github.com/bhupendra1988/maven-project.git'
+ }
+ stage('ContinuousBuild')
+ {
+     sh label: '', script: '/opt/apache-maven/bin/mvn package'
+ }
+ stage('ContinuousDeployment')
+ {
+     sh label: '', script: 'scp -v -o StrictHostKeyChecking=no /var/lib/jenkins/workspace/pipeline/webapp/target/webapp.war ec2-user@172.31.28.31:/var/lib/tomcat8/webapps/testwebapp.war'
+ }
+ stage('ContinuousTesting')
+ {
+     git 'https://github.com/selenium-saikrishna/FunctionalTesting.git'
+     sh label: '', script: 'echo "TestingPassed"'
+ }
+ stage('ContinuousDelivery')
+ {
+     sh label: '', script: 'scp -v -o StrictHostKeyChecking=no /var/lib/jenkins/workspace/pipeline/webapp/target/webapp.war ec2-user@172.31.19.158:/var/lib/tomcat8/webapps/prodwebapp.war'
+ }
+}
+#######################################
